@@ -1,1 +1,39 @@
+name: Publish Release
 
+on:
+  push:
+    branches:
+      - main  # Replace with your desired branch name
+
+jobs:
+  build:
+    runs-on: windows-latest  # Or any other platform you want to build for
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x  # Replace with your desired .NET version
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Publish
+      run: dotnet publish --no-build
+
+    - name: Build Electron App
+      run: electron-builder build --win --x64
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./bin/Desktop/*/*.exe
+          ./bin/Desktop/*/*.zip
+        generate_release_notes: true
